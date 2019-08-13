@@ -1,68 +1,87 @@
 <template>
-  <div @click="clickHandle">
-
-    <div class="userinfo" @click="bindViewTap">
-      <img class="userinfo-avatar" v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" background-size="cover" />
-      <img class="userinfo-avatar" src="/static/images/user.png" background-size="cover" />
-
-      <div class="userinfo-nickname">
-        <card :text="userInfo.nickName"></card>
-      </div>
-    </div>
-
-    <div class="usermotto">
-      <div class="user-motto">
-        <card :text="motto"></card>
-      </div>
-    </div>
-
-    <form class="form-container">
-      <input type="text" class="form-control" :value="motto" placeholder="v-model" />
-      <input type="text" class="form-control" v-model="motto" placeholder="v-model" />
-      <input type="text" class="form-control" v-model.lazy="motto" placeholder="v-model.lazy" />
-    </form>
-
-    <a href="/pages/counter/main" class="counter">去往Vuex示例页面</a>
-
-    <div class="all">
-        <div class="left">
-        </div>
-        <div class="right">
-        </div>
-    </div>
+  <div class="training-counter__container">
+    <counter
+      ref="counter"
+      :countArr="countArr"
+      :count="countNumber"
+      @countStop="countDownOnce"
+    ></counter>
+    <settings></settings>
+    <exec-area
+      :currentStatus="counterStatus"
+      @startCount="startCount"
+      @stopCount="stopCount"
+    ></exec-area>
   </div>
 </template>
 
 <script>
-import card from '@/components/card'
+import counter from '@/components/counter'
+import ExecArea from '@/components/exec'
+import Settings from '@/components/settings'
 
 export default {
   data () {
     return {
-      motto: 'Hello miniprograme',
-      userInfo: {
-        nickName: 'mpvue',
-        avatarUrl: 'http://mpvue.com/assets/logo.png'
-      }
+      countArr: [],
+      countPos: -1,
+      counterStatus: 0
+    }
+  },
+
+  computed: {
+    countNumber () {
+      return this.countArr[this.countPos] || -1
     }
   },
 
   components: {
-    card
+    counter,
+    ExecArea,
+    Settings
   },
 
   methods: {
-    bindViewTap () {
-      const url = '../logs/main'
-      if (mpvuePlatform === 'wx') {
-        mpvue.switchTab({ url })
-      } else {
-        mpvue.navigateTo({ url })
+    startCount () {
+      const settingType = mpvue.getStorageSync('settingType') || 'single'
+      const settings = mpvue.getStorageSync(settingType + 'Setting')
+      if (!settings) {
+        return mpvue.showToast({
+          title: '无设定内容',
+          icon: 'none'
+        })
       }
+      if (settingType === 'single') {
+        for (let key in settings) {
+          if (!/\d/.test(settings[key])) {
+            return mpvue.showToast({
+              title: '设定内容有误, 请设定为数字!',
+              icon: 'none'
+            })
+          }
+        }
+        let startArrays = []
+        for (let i = 0; i < Number(settings.group); i++) {
+          startArrays.push(Number(settings.time), Number(settings.break))
+        }
+        this.countArr = startArrays
+      } else {
+        // multiple
+      }
+      this.countPos = 0
+      this.counterStatus = 1
     },
-    clickHandle (ev) {
-      console.log('clickHandle:', ev)
-      // throw {message: 'custom test'}
+    stopCount () {
+      this.counterStatus = 0
+    },
+    countDownOnce () {
+      this.countPos++
+      if (this.countPos > this.countArr.length - 1) {
+        // count over
+        this.stopCount()
+      } else {
+        // next count
+      }
     }
   },
 
