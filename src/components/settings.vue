@@ -23,6 +23,7 @@
     </div>
     <div v-else class="multiple-setting">
       多项
+      <button @click="toMultiple">前往设定</button>
     </div>
   </div>
 </template>
@@ -60,6 +61,11 @@ export default {
     settingTypeChange (e) {
       this.isMulti = e.mp.detail.value
       mpvue.setStorageSync('settingType', this.isMulti ? 'multiple' : 'single')
+    },
+    toMultiple () {
+      mpvue.navigateTo({
+        url: '/pages/multiple/main'
+      })
     }
   }
 }
