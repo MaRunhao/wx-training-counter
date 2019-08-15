@@ -59,6 +59,19 @@ export default {
       }
     }
   },
+  watch: {
+    queue: {
+      handler (q) {
+        let storage = mpvue.getStorageSync('multipleSetting') || { group: 0 }
+        mpvue.setStorageSync('multipleSetting', {...storage, queue: q})
+      },
+      deep: true
+    }
+  },
+  created () {
+    let storage = mpvue.getStorageSync('multipleSetting') || { group: 0, queue: [] }
+    this.queue = storage.queue
+  },
   methods: {
     _add () {
       this.editing = true

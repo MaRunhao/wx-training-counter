@@ -4,13 +4,19 @@
       ref="counter"
       :countArr="countArr"
       :count="countNumber"
+      :countPos="countPos"
       @countStop="countDownOnce"
     ></counter>
-    <settings></settings>
+    <settings
+      :multiplePos="multiplePos"
+    ></settings>
     <exec-area
       :currentStatus="counterStatus"
       @startCount="startCount"
       @stopCount="stopCount"
+      @skipCount="skipCount"
+      @pauseCount="pauseCount"
+      @continueCount="continueCount"
     ></exec-area>
   </div>
 </template>
@@ -25,13 +31,16 @@ export default {
     return {
       countArr: [],
       countPos: -1,
-      counterStatus: 0
+      counterStatus: 'waiting'
     }
   },
 
   computed: {
     countNumber () {
       return this.countArr[this.countPos] || -1
+    },
+    multiplePos () {
+      return this.countPos >= 0 ? Math.floor(this.countPos / 2) : 0
     }
   },
 
@@ -67,12 +76,17 @@ export default {
         this.countArr = startArrays
       } else {
         // multiple
+        let { group, queue } = settings
+        if (!/\d/.test(group) || Number(group) <= 0) {
+          return mpvue.showToast({ title: '请设定正确的循环组数', icon: 'none' })
+        }
+        if (!Array.isArray(queue) || !queue.length) {
+          return mpvue.showToast({ title: '尚未设定训练内容', icon: 'none' })
+        }
+        this.countArr = Array.prototype.flat.call(queue.map(item => [item.time, item.break]), 2)
       }
       this.countPos = 0
-      this.counterStatus = 1
-    },
-    stopCount () {
-      this.counterStatus = 0
+      this.counterStatus = 'running'
     },
     countDownOnce () {
       this.countPos++
@@ -82,6 +96,21 @@ export default {
       } else {
         // next count
       }
+    },
+    stopCount () {
+      this.counterStatus = 'waiting'
+      this.countPos = -1
+    },
+    skipCount () {
+      this.$eventBus.$emit('skipCount')
+    },
+    pauseCount () {
+      this.$eventBus.$emit('pauseCount')
+      this.counterStatus = 'pause'
+    },
+    continueCount () {
+      this.$eventBus.$emit('continueCount')
+      this.counterStatus = 'continue'
     }
   },
 

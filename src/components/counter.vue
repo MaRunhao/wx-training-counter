@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="counter">
+    <p class="counter" ref="counter">
       {{currentCount === -1 ? 0 : currentCount}}
     </p>
   </div>
@@ -13,6 +13,10 @@ export default {
     count: {
       type: Number,
       default: 0
+    },
+    countPos: {
+      type: Number,
+      default: -1
     }
   },
   data () {
@@ -22,11 +26,18 @@ export default {
     }
   },
   watch: {
-    count () {
-      // start
-      this.startCountDown()
+    countPos (val, old) {
+      if (val > -1) {
+        // start
+        this.startCountDown()
+      } else {
+        // stop
+        this.timer && clearInterval(this.timer)
+      }
     },
     currentCount (val) {
+      let percent = 100 - val / this.count * 100
+      this.$refs.counter.style.backgroundPositionX = `-${percent}vw`
       if (val <= 0) {
         this.timer && clearInterval(this.timer)
         this.$emit('countStop')
@@ -36,9 +47,22 @@ export default {
       }
     }
   },
+  mounted () {
+    this.$eventBus.$on('skipCount', () => {
+      console.log('SKIP!!!!')
+      this.timer && clearInterval(this.timer)
+      this.$emit('countStop')
+    })
+    this.$eventBus.$on('pauseCount', () => {
+      this.timer && clearInterval(this.timer)
+    })
+    this.$eventBus.$on('continueCount', () => {
+      this.startCountDown('continue')
+    })
+  },
   methods: {
-    startCountDown () {
-      this.currentCount = this.count
+    startCountDown (isContinue) {
+      isContinue || (this.currentCount = this.count)
       this.timer = setInterval(() => {
         this.currentCount--
       }, 1000)
@@ -54,8 +78,14 @@ export default {
 }
 </script>
 
-<style>
-.card {
-  padding: 10px;
+<style scoped>
+.counter {
+  font-size: 70px;
+  height: 30vh;
+  line-height: 30vh;
+  text-align: center;
+  background-image: linear-gradient(90deg, salmon, salmon 200px);
+  background-repeat: no-repeat;
+  background-position-x: -100vw;
 }
 </style>

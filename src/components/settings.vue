@@ -1,9 +1,8 @@
 <template>
   <div class="settings-comp">
     <div class="setting-type">
-      <span :style="isMulti ? '' : 'color: #07c160;'">单项循环</span>
-      <switch :checked="isMulti" @change="settingTypeChange"></switch>
-      <span :style="isMulti ? 'color: #07c160;' : ''">多项设定</span>
+      <span :style="isMulti ? '' : 'color: #07c160;'" @click="isMulti = false">单项循环</span>
+      <span :style="isMulti ? 'color: #07c160;' : ''" @click="isMulti = true">多项设定</span>
     </div>
     <div v-if="!isMulti" class="single-setting">
       <form @submit="submitSingleSetting">
@@ -22,14 +21,40 @@
       </form>
     </div>
     <div v-else class="multiple-setting">
-      多项
-      <button @click="toMultiple">前往设定</button>
+      <div class="mul-group">
+        <span class="icon icon-cycle"></span>{{multiple.group}}
+      </div>
+      <section class="mul-view">
+        <div
+          v-for="item in multiple.queue" :key="item.id"
+          class="mul-item" :class="{'current': multiplePos === item.id}"
+        >
+          <p class="mul-item__name">{{item.name}}</p>
+          <p class="mul-item__time">
+            <span class="icon icon-sport"></span>
+            {{item.time}}
+            <span class="sub-unit">s</span>
+          </p>
+          <p class="mul-item__break">
+            <span class="icon icon-break"></span>
+            {{item.break}}
+            <span class="sub-unit">s</span>
+          </p>
+        </div>
+      </section>
+      <button class="mul-set" @click="toMultiple">前往设定</button>
     </div>
   </div>
 </template>
 <script>
 export default {
   name: 'Settings',
+  props: {
+    multiplePos: {
+      type: Number,
+      default: 0
+    }
+  },
   data () {
     return {
       isMulti: false,
@@ -39,7 +64,10 @@ export default {
         break: 0,
         group: 0
       },
-      multiple: []
+      multiple: {
+        group: 0,
+        queue: []
+      }
     }
   },
   watch: {
@@ -54,7 +82,7 @@ export default {
     this.isMulti = mpvue.getStorageSync('settingType') === 'multiple'
     const singleSettings = mpvue.getStorageSync('singleSetting')
     singleSettings && this.$set(this, 'single', singleSettings)
-    const multipleSettings = mpvue.getStorageSync('multipleSettings')
+    const multipleSettings = mpvue.getStorageSync('multipleSetting')
     multipleSettings && this.$set(this, 'multiple', multipleSettings)
   },
   methods: {
@@ -63,7 +91,7 @@ export default {
       mpvue.setStorageSync('settingType', this.isMulti ? 'multiple' : 'single')
     },
     toMultiple () {
-      mpvue.navigateTo({
+      mpvue.redirectTo({
         url: '/pages/multiple/main'
       })
     }
@@ -71,5 +99,40 @@ export default {
 }
 </script>
 <style scoped>
-
+.multiple-setting {
+  display: flex;
+  flex-direction: column;
+  height: 160px;
+}
+.mul-group {
+  height: 40px;
+}
+.mul-view {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-wrap: nowrap;
+}
+.mul-item {
+  width: 90px;
+  min-width: 90px;
+  border: 1px solid #cecece;
+  border-radius: 6px;
+}
+.mul-item.current {
+  color: #fff;
+  background: #07c160;
+}
+.mul-item.current .icon {
+  filter: brightness(7);
+}
+.mul-item + .mul-item {
+  margin-left: 5px;
+}
+.mul-set {
+  height: 40px;
+}
+.sub-unit {
+  font-size: 14px;
+}
 </style>
