@@ -5,9 +5,10 @@
       :key="idx"
       class="sort-view__item"
     >
-      <div class="sort__btn"></div>
+      <div class="sort__btn">
+        <span class="icon icon-menu"></span>
+      </div>
       <div class="sort__content" @click="_edit(item)">
-        <!-- // todo: 内容填充 -->
         <div class="sp-name">{{item.name}}</div>
         <div class="sp-time">训练{{item.time}}s</div>
         <div class="sp-break">休息{{item.break}}s</div>
@@ -66,6 +67,12 @@ export default {
         mpvue.setStorageSync('multipleSetting', {...storage, queue: q})
       },
       deep: true
+    },
+    'edit.time' (time) {
+      this.edit.time = Number(time)
+    },
+    'edit.break' (time) {
+      this.edit.break = Number(time)
     }
   },
   created () {
@@ -148,11 +155,15 @@ export default {
 }
 .sort__btn {
   width: 50px;
+  line-height: 15vh;
+  text-align: center;
+}
+.sort__btn .icon {
+  width: 18px;
+  height: 18px;
 }
 .sort__content {
   flex: 1;
-  border-left: 1px dashed #cecece;
-  border-right: 1px dashed #cecece;
 }
 .sort__operate {
   width: 60px;

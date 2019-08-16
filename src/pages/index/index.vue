@@ -83,7 +83,7 @@ export default {
         if (!Array.isArray(queue) || !queue.length) {
           return mpvue.showToast({ title: '尚未设定训练内容', icon: 'none' })
         }
-        this.countArr = Array.prototype.flat.call(queue.map(item => [item.time, item.break]), 2)
+        this.countArr = new Array(group).fill(Array.prototype.flat.call(queue.map(item => [item.time, item.break]), 2)).flat()
       }
       this.countPos = 0
       this.counterStatus = 'running'

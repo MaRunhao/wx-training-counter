@@ -30,6 +30,7 @@ export default {
       mpvue.redirectTo({url: '/pages/index/main'})
     },
     groupCountChange () {
+      this.multipleGroupCount = Number(this.multipleGroupCount)
       let storage = mpvue.getStorageSync('multipleSetting') || { group: 0, queue: [] }
       mpvue.setStorageSync('multipleSetting', {...storage, group: this.multipleGroupCount})
     }

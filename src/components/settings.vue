@@ -1,14 +1,14 @@
 <template>
   <div class="settings-comp">
     <div class="setting-type">
-      <span :style="isMulti ? '' : 'color: #07c160;'" @click="isMulti = false">单项循环</span>
-      <span :style="isMulti ? 'color: #07c160;' : ''" @click="isMulti = true">多项设定</span>
+      <span style="flex: 1; text-align: center;" :style="isMulti ? '' : 'color: #07c160;'" @click="settingTypeChange(0)">单项循环</span>
+      <span style="flex: 1; text-align: center;" :style="isMulti ? 'color: #07c160;' : ''" @click="settingTypeChange(1)">多项设定</span>
     </div>
     <div v-if="!isMulti" class="single-setting">
       <form @submit="submitSingleSetting">
         <div class="form-item">
           <span class="form-title">每组时间</span>
-          <input v-model="single.time" class="form-input number" type="number" />
+          <input v-model="single.time" class="form-input time-input number" type="number" />
         </div>
         <div class="form-item">
           <span class="form-title">组数</span>
@@ -16,13 +16,13 @@
         </div>
         <div class="form-item">
           <span class="form-title">休息间隔</span>
-          <input v-model="single.break" class="form-input number" type="number" />
+          <input v-model="single.break" class="form-input time-input number" type="number" />
         </div>
       </form>
     </div>
     <div v-else class="multiple-setting">
       <div class="mul-group">
-        <span class="icon icon-cycle"></span>{{multiple.group}}
+        <span class="icon icon-cycle"></span>&emsp;{{multiple.group}}
       </div>
       <section class="mul-view">
         <div
@@ -85,9 +85,18 @@ export default {
     const multipleSettings = mpvue.getStorageSync('multipleSetting')
     multipleSettings && this.$set(this, 'multiple', multipleSettings)
   },
+  onShow () {
+    if (this.isMulti) {
+      const multipleSettings = mpvue.getStorageSync('multipleSetting')
+      multipleSettings && this.$set(this, 'multiple', multipleSettings)
+    } else {
+      const singleSettings = mpvue.getStorageSync('singleSetting')
+      singleSettings && this.$set(this, 'single', singleSettings)
+    }
+  },
   methods: {
-    settingTypeChange (e) {
-      this.isMulti = e.mp.detail.value
+    settingTypeChange (type) {
+      this.isMulti = !!type
       mpvue.setStorageSync('settingType', this.isMulti ? 'multiple' : 'single')
     },
     toMultiple () {
@@ -99,13 +108,48 @@ export default {
 }
 </script>
 <style scoped>
+.setting-type {
+  display: flex;
+  justify-content: space-between;
+}
+.single-setting {
+  padding: 10px;
+}
+.form-item {
+  display: flex;
+  height: 50px;
+  line-height: 50px;
+}
+.form-item + .form-item {
+  border-top: 1px solid #a6a6a6;
+}
+.form-item .form-title {
+  width: 120px;
+}
+.form-item .form-input {
+  position: relative;
+  flex: 1;
+  padding: 14px 20vw;
+}
+.form-item .time-input::after {
+  content: '秒';
+  position: absolute;
+  top: 3px;
+  right: 26px;
+  font-size: 14px;
+  color: #999;
+}
+
 .multiple-setting {
   display: flex;
   flex-direction: column;
-  height: 160px;
+  height: 200px;
+  padding: 0 10px;
 }
 .mul-group {
-  height: 40px;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
 }
 .mul-view {
   flex: 1;
@@ -114,10 +158,18 @@ export default {
   flex-wrap: nowrap;
 }
 .mul-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   width: 90px;
   min-width: 90px;
   border: 1px solid #cecece;
   border-radius: 6px;
+  padding-left: 10px;
+}
+.mul-item ._p {
+  flex: 1;
+  line-height: 1.7;
 }
 .mul-item.current {
   color: #fff;
@@ -131,6 +183,10 @@ export default {
 }
 .mul-set {
   height: 40px;
+  width: 100%;
+  color: #409eff;
+  background: #fff;
+  border: 0 !important;
 }
 .sub-unit {
   font-size: 14px;

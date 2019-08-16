@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="counter" ref="counter">
+    <p class="counter" :style="'background-position-x: ' + (0 - currentCount / count * 100) + 'vw;'">
       {{currentCount === -1 ? 0 : currentCount}}
     </p>
   </div>
@@ -36,8 +36,6 @@ export default {
       }
     },
     currentCount (val) {
-      let percent = 100 - val / this.count * 100
-      this.$refs.counter.style.backgroundPositionX = `-${percent}vw`
       if (val <= 0) {
         this.timer && clearInterval(this.timer)
         this.$emit('countStop')
